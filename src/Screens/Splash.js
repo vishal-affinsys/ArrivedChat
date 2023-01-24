@@ -1,27 +1,43 @@
 import React from 'react';
-import {View, StatusBar, Image} from 'react-native';
+import {View, StatusBar, StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {ActivityIndicator} from 'react-native-paper';
+import {getData, KEYS} from '../Helper/LocalStorage';
 
 const Splash = () => {
   const navigate = useNavigation();
-  const init = async () => {
-    navigate.reset({
-      routes: [{name: 'home'}],
-    });
-  };
+
   React.useEffect(() => {
-    init();
+    async function getKey() {
+      const check = await getData({keystore: KEYS.adminUser});
+      if (check !== null) {
+        navigate.reset({
+          routes: [{name: 'home'}],
+        });
+      } else {
+        navigate.reset({
+          routes: [{name: 'register'}],
+        });
+      }
+    }
+    getKey();
   });
+
   return (
-    <View>
+    <View style={style.body}>
       <StatusBar translucent backgroundColor={'transparent'} />
-      <Image
-        // resizeMode={'stretch'}
-        source={require('../../assets/images/splash.png')}
-        alt="splash"
-      />
+      <ActivityIndicator />
     </View>
   );
 };
 
 export default Splash;
+
+const style = StyleSheet.create({
+  body: {
+    flex: 1,
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

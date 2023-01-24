@@ -24,6 +24,7 @@ function SocketProvider({children}) {
     setMessages(previous => [...previous, messageObject]);
   }
   const listener = React.useCallback(() => {
+    console.log('listening');
     socket.addListener(setMessages);
   }, []);
 
@@ -31,7 +32,6 @@ function SocketProvider({children}) {
     listener();
 
     return () => {
-      console.log('closing connection');
       socket.removeListener();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

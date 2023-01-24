@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/native';
 import React from 'react';
-import {View, StyleSheet, Animated} from 'react-native';
+import {View, StyleSheet, Animated, PermissionsAndroid} from 'react-native';
 import {
   Avatar,
   List,
@@ -11,6 +11,7 @@ import {
 import Chat from '../../chatData.json';
 import Header from '../Components/Header';
 import HorizontalList from '../Components/HorizontalList';
+import {outLog} from '../Helper/Logger';
 
 const LeftElement = item => {
   return <Avatar.Image source={{uri: item.picture}} />;
@@ -41,6 +42,14 @@ const HomeScreen = () => {
     extrapolate: 'clamp',
   });
   const navigate = useNavigation();
+
+  React.useEffect(() => {
+    PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+    ).then(data => {
+      outLog.green('--> Permission ', data);
+    });
+  });
 
   return (
     <View style={style.body}>

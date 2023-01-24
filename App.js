@@ -10,6 +10,8 @@ import Homescreen from './src/Screens/Homescreen';
 import {Platform} from 'react-native';
 import ChatScreen from './src/Screens/ChatScreen';
 import SocketProvider from './src/Store/Context/socketProvider';
+import RegisterScreen from './src/Screens/RegisterScreen';
+import Splash from './src/Screens/Splash';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +40,8 @@ function App() {
       <PaperProvider theme={theme}>
         <NavigationContainer>
           <Stack.Navigator screenOptions={{headerShown: false}}>
+            <Stack.Screen name="splash" component={Splash} />
+            <Stack.Screen name="register" component={RegisterScreen} />
             <Stack.Screen name="home" component={Homescreen} />
             <Stack.Screen name="chat" component={ChatScreen} />
           </Stack.Navigator>

@@ -1,6 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {outLog} from './Logger';
 
+export const KEYS = {
+  adminUser: 'adminUser',
+};
+
 export const storeData = async ({keystore, value}) => {
   try {
     const jsonValue = JSON.stringify(value);
@@ -15,7 +19,7 @@ export const storeData = async ({keystore, value}) => {
 export const getData = async ({keystore}) => {
   try {
     const jsonValue = await AsyncStorage.getItem(keystore);
-    return jsonValue != null ? JSON.parse(jsonValue) : null;
+    return jsonValue !== null ? await JSON.parse(jsonValue) : null;
   } catch (e) {
     outLog.red(
       `🤖 Storage error on:\n keystore: ${keystore}\n with error: ${e}`,
