@@ -12,6 +12,8 @@ import ChatScreen from './src/Screens/ChatScreen';
 import SocketProvider from './src/Store/Context/socketProvider';
 import RegisterScreen from './src/Screens/RegisterScreen';
 import Splash from './src/Screens/Splash';
+import {Provider} from 'react-redux';
+import {store} from './src/Store/store';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,14 +40,16 @@ function App() {
   return (
     <SocketProvider>
       <PaperProvider theme={theme}>
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{headerShown: false}}>
-            <Stack.Screen name="splash" component={Splash} />
-            <Stack.Screen name="register" component={RegisterScreen} />
-            <Stack.Screen name="home" component={Homescreen} />
-            <Stack.Screen name="chat" component={ChatScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <Provider store={store}>
+          <NavigationContainer>
+            <Stack.Navigator screenOptions={{headerShown: false}}>
+              <Stack.Screen name="splash" component={Splash} />
+              <Stack.Screen name="register" component={RegisterScreen} />
+              <Stack.Screen name="home" component={Homescreen} />
+              <Stack.Screen name="chat" component={ChatScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </Provider>
       </PaperProvider>
     </SocketProvider>
   );

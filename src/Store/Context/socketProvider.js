@@ -24,7 +24,6 @@ function SocketProvider({children}) {
     setMessages(previous => [...previous, messageObject]);
   }
   const listener = React.useCallback(() => {
-    console.log('listening');
     socket.addListener(setMessages);
   }, []);
 

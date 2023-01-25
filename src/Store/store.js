@@ -1,10 +1,10 @@
 import {configureStore, combineReducers} from '@reduxjs/toolkit';
-import MessageReducer from './Reducers/MessageReducers';
 import Contact from './Reducers/Contact';
+import UserInfo from './Reducers/UserInfo';
 
 const reducer = combineReducers({
-  message: MessageReducer,
-  contact: Contact,
+  contactInfo: Contact,
+  user: UserInfo,
 });
 
 export const store = configureStore({

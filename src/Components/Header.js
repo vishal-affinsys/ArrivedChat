@@ -1,22 +1,37 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Avatar, MD3Colors, Text, Searchbar} from 'react-native-paper';
+import {useDispatch, useSelector} from 'react-redux';
 import Chat from '../../chatData.json';
+import {searchContact, resetContact} from '../Store/Reducers/Contact';
 
-const Header = () => {
+const Header = ({name, setLazyContact}) => {
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = React.useState(false);
   return (
     <View>
       <View style={style.header}>
         <Avatar.Image source={{uri: Chat.profile.picture}} />
         <Text style={style.headerText} variant="headlineSmall">
-          Hi, {Chat.profile.name}
+          Hi, {name}
         </Text>
       </View>
       <Searchbar
         style={style.searchBar}
         placeholder="search"
+        loading={isLoading}
         placeholderTextColor={'white'}
         iconColor={'white'}
+        onChangeText={txt => {
+          setIsLoading(true);
+          setTimeout(() => {
+            dispatch(searchContact(txt));
+            setIsLoading(false);
+            if (txt === '') {
+              dispatch(resetContact());
+            }
+          }, 2000);
+        }}
         inputStyle={style.searchTextStyle}
       />
     </View>

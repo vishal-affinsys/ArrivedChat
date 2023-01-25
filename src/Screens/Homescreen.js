@@ -1,29 +1,21 @@
-import {useNavigation} from '@react-navigation/native';
 import React from 'react';
 import {View, StyleSheet, Animated, PermissionsAndroid} from 'react-native';
-import {
-  Avatar,
-  List,
-  MD3Colors,
-  Text,
-  TouchableRipple,
-} from 'react-native-paper';
-import Chat from '../../chatData.json';
+import {MD3Colors, Text} from 'react-native-paper';
+import {useDispatch, useSelector} from 'react-redux';
 import Header from '../Components/Header';
 import HorizontalList from '../Components/HorizontalList';
-import {outLog} from '../Helper/Logger';
+import Contacts from 'react-native-contacts';
+import {loadMore, setContact} from '../Store/Reducers/Contact';
+import User from '../Models/User';
+import ChatTile from '../Components/ChatTile';
 
-const LeftElement = item => {
-  return <Avatar.Image source={{uri: item.picture}} />;
-};
-
-const RightElement = item => {
-  return <Text style={style.timeStamp}>{item.latest_timestamp}</Text>;
-};
 const HEADER_HEIGHT = 250;
 
 const HomeScreen = () => {
   const scrollY = React.useRef(new Animated.Value(0)).current;
+  const userRdx = useSelector(state => state.user);
+  const contact = useSelector(state => state.contactInfo.renderContact);
+  const dispatch = useDispatch();
 
   const translateY = scrollY.interpolate({
     inputRange: [0, HEADER_HEIGHT * 2],
@@ -41,15 +33,28 @@ const HomeScreen = () => {
     outputRange: [0, 1],
     extrapolate: 'clamp',
   });
-  const navigate = useNavigation();
 
   React.useEffect(() => {
-    PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
-    ).then(data => {
-      outLog.green('--> Permission ', data);
-    });
-  });
+    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
+      title: 'Contacts',
+      message: 'This app would like to view your contacts.',
+      buttonPositive: 'Please accept bare mortal',
+    })
+      .then(res => {
+        console.log('Permission: ', res);
+        Contacts.getAllWithoutPhotos()
+          .then(contacts => {
+            dispatch(setContact(User.createUserFromContacts(contacts)));
+            // console.log(JSON.stringify(lazyContact.length, null, 2));
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      })
+      .catch(error => {
+        console.error('Permission error: ', error);
+      });
+  }, [dispatch]);
 
   return (
     <View style={style.body}>
@@ -59,7 +64,7 @@ const HomeScreen = () => {
           {transform: [{translateY: translateY}]},
           {opacity: opacity},
         ]}>
-        <Header />
+        <Header name={userRdx.user.name} />
         <HorizontalList onPress={item => {}} />
       </Animated.View>
       <Animated.View style={{opacity: textOpacity}}>
@@ -79,31 +84,15 @@ const HomeScreen = () => {
           {useNativeDriver: true},
         )}
         scrollEventThrottle={10}
+        onEndReachedThreshold={0.01}
+        onEndReached={() => dispatch(loadMore())}
         showsVerticalScrollIndicator={false}
-        data={Chat.profile.friends}
+        data={contact}
+        removeClippedSubviews={true}
         renderItem={({item}) => {
-          return (
-            <TouchableRipple
-              rippleColor={MD3Colors.neutral50}
-              onPress={() => {
-                navigate.navigate('chat');
-              }}>
-              <List.Item
-                style={style.chatItem}
-                title={item.name}
-                description={item.lastChat}
-                titleStyle={style.titleStyle}
-                left={() => {
-                  return LeftElement(item);
-                }}
-                right={() => {
-                  return RightElement(item);
-                }}
-                descriptionStyle={style.descriptionStyle}
-              />
-            </TouchableRipple>
-          );
+          return <ChatTile item={item} />;
         }}
+        bounces
       />
     </View>
   );
@@ -131,22 +120,5 @@ const style = StyleSheet.create({
     fontSize: 23,
     padding: 12,
     fontWeight: 'bold',
-  },
-  chatItem: {
-    padding: 12,
-  },
-  titleStyle: {
-    color: 'white',
-    fontSize: 19,
-  },
-  descriptionStyle: {
-    fontSize: 11,
-    color: 'grey',
-    fontFamily: 'NotoSerif-Regular',
-  },
-  timeStamp: {
-    fontSize: 11,
-    color: 'grey',
-    justifyContent: 'center',
   },
 });

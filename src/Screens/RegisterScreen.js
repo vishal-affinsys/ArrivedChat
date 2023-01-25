@@ -2,7 +2,9 @@ import {useNavigation} from '@react-navigation/native';
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Button, HelperText, Text, TextInput} from 'react-native-paper';
+import {useDispatch} from 'react-redux';
 import {KEYS, storeData} from '../Helper/LocalStorage';
+import {setUser} from '../Store/Reducers/UserInfo';
 
 const RegisterScreen = () => {
   const [text, setText] = React.useState('');
@@ -10,8 +12,9 @@ const RegisterScreen = () => {
   const onChangeText = val => setText(val);
   const [loading, setLoading] = React.useState(false);
   const [completed, setCompleted] = React.useState(false);
-
+  const navigate = useNavigation();
   const [name, setName] = React.useState('');
+  const dispatch = useDispatch();
 
   const hasErrors = () => {
     return text.length < 10;
@@ -19,7 +22,7 @@ const RegisterScreen = () => {
   const checkName = () => {
     return name.length < 3;
   };
-  const navigate = useNavigation();
+
   return (
     <View style={style.body}>
       <Text style={style.headlineStyle} variant="headlineLarge">
@@ -60,14 +63,15 @@ const RegisterScreen = () => {
             return;
           } else {
             setLoading(true);
-            setTimeout(() => {
+            setTimeout(async () => {
               console.log('Completed');
               setLoading(false);
               setCompleted(true);
               console.log({name: name, number: text});
-              storeData({
+              dispatch(setUser({name: name, number: text}));
+              await storeData({
                 keystore: KEYS.adminUser,
-                value: JSON.stringify({name: name, number: text}),
+                value: {name: name, number: text},
               });
               navigate.reset({
                 routes: [{name: 'home'}],

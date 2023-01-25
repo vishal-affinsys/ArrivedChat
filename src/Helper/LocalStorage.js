@@ -19,7 +19,13 @@ export const storeData = async ({keystore, value}) => {
 export const getData = async ({keystore}) => {
   try {
     const jsonValue = await AsyncStorage.getItem(keystore);
-    return jsonValue !== null ? await JSON.parse(jsonValue) : null;
+    console.log(typeof jsonValue, jsonValue);
+    if (jsonValue !== null) {
+      const data = JSON.parse(jsonValue);
+      return data;
+    } else {
+      return null;
+    }
   } catch (e) {
     outLog.red(
       `🤖 Storage error on:\n keystore: ${keystore}\n with error: ${e}`,
