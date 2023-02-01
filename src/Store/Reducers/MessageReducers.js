@@ -1,81 +1,45 @@
-import {createSlice} from '@reduxjs/toolkit';
-
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
+import Socket, {createRoomId} from '../../Helper/SocketHandler';
 
-const socket = [];
-const initialState = {
-  messages: [],
-  status: 'connecting',
-};
-
+const ws = new Socket();
 export const api = createApi({
+  reducerPath: 'messages',
   baseQuery: fetchBaseQuery({baseUrl: '/'}),
   endpoints: build => ({
     getMessages: build.query({
-      query: channel => `messages/${channel}`,
+      queryFn: async () => {
+        return {data: {}};
+      },
       async onCacheEntryAdded(
         arg,
         {updateCachedData, cacheDataLoaded, cacheEntryRemoved},
       ) {
-        // create a websocket connection when the cache subscription starts
-        const ws = new WebSocket('ws://localhost:8080');
+        await cacheDataLoaded;
         try {
-          // wait for the initial query to resolve before proceeding
-          await cacheDataLoaded;
-
-          // when data is received from the socket connection to the server,
-          // if it is a message and for the appropriate channel,
-          // update our query result with the received message
-          const listener = event => {
-            const data = JSON.parse(event.data);
-
-            updateCachedData(draft => {
-              draft.push(data);
+          ws.addListener(data => {
+            const roomId = createRoomId({
+              source: data.source,
+              target: data.target,
             });
-          };
-
-          ws.addEventListener('message', listener);
-        } catch {
-          // no-op in case `cacheEntryRemoved` resolves before `cacheDataLoaded`,
-          // in which case `cacheDataLoaded` will throw
-        }
-        // cacheEntryRemoved will resolve when the cache subscription is no longer active
-        await cacheEntryRemoved;
-        // perform cleanup steps once the `cacheEntryRemoved` promise resolves
-        ws.close();
+            updateCachedData(draft => {
+              if (draft[roomId] === undefined) {
+                draft[roomId] = [];
+                draft[roomId].push(data);
+              } else {
+                draft[roomId].push(data);
+              }
+            });
+          });
+        } catch {}
+      },
+    }),
+    sendMessages: build.query({
+      queryFn: async ({message, time, source, target}) => {
+        ws.sendMessage({message, time, source, target});
+        return {data: {message, time, source, target}};
       },
     }),
   }),
 });
 
-export const {useGetMessagesQuery} = api;
-
-export const messagelice = createSlice({
-  name: 'message',
-  initialState: initialState,
-  reducers: {
-    addListener: (state, action) => {
-      socket.addListener(data => {
-        console.log('----state---', data);
-        state.messages.push(data);
-      });
-    },
-    removeListener: (state, action) => {
-      socket.removeListener();
-    },
-    sendMessage: (state, action) => {
-      console.log('sending..', action);
-      socket.sendMessage({
-        message: action.payload.message,
-        source: '7084324572',
-        target: '7084324572',
-        time: new Date().toDateString(),
-      });
-    },
-  },
-});
-
-export default messagelice.reducer;
-export const addListener = messagelice.actions.addListener;
-export const removeListener = messagelice.actions.removeListener;
-export const sendMessage = messagelice.actions.sendMessage;
+export const {useGetMessagesQuery, useSendMessagesQuery} = api;

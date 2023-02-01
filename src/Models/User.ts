@@ -5,6 +5,11 @@ interface IUser {
   lastMessage: string;
   lastMessageTimestamp: string;
 }
+
+export const friendsImage =
+  'https://img.icons8.com/3d-fluency/94/null/user-male-circle.png';
+
+export const userImage = 'https://image.ibb.co/k0wVTm/profile_pic.jpg';
 class User {
   name: string;
   number: string;
@@ -26,8 +31,7 @@ class User {
           new User({
             name: contact[i].displayName,
             number: contact[i].phoneNumbers[0].number,
-            imageUrl:
-              'https://img.icons8.com/3d-fluency/94/null/user-male-circle.png',
+            imageUrl: friendsImage,
             lastMessage: '',
             lastMessageTimestamp: '',
           }),

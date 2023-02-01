@@ -1,15 +1,20 @@
 import React from 'react';
-import {View, StyleSheet, Animated, PermissionsAndroid} from 'react-native';
-import {MD3Colors, Text} from 'react-native-paper';
+import {
+  View,
+  StyleSheet,
+  Animated,
+  PermissionsAndroid,
+  StatusBar,
+} from 'react-native';
+import {MD3Colors, Text, ActivityIndicator} from 'react-native-paper';
 import {useDispatch, useSelector} from 'react-redux';
 import Header from '../Components/Header';
-import HorizontalList from '../Components/HorizontalList';
 import Contacts from 'react-native-contacts';
 import {loadMore, setContact} from '../Store/Reducers/Contact';
 import User from '../Models/User';
 import ChatTile from '../Components/ChatTile';
 
-const HEADER_HEIGHT = 250;
+const HEADER_HEIGHT = 130;
 
 const HomeScreen = () => {
   const scrollY = React.useRef(new Animated.Value(0)).current;
@@ -45,7 +50,6 @@ const HomeScreen = () => {
         Contacts.getAllWithoutPhotos()
           .then(contacts => {
             dispatch(setContact(User.createUserFromContacts(contacts)));
-            // console.log(JSON.stringify(lazyContact.length, null, 2));
           })
           .catch(e => {
             console.log(e);
@@ -58,6 +62,7 @@ const HomeScreen = () => {
 
   return (
     <View style={style.body}>
+      <StatusBar backgroundColor={MD3Colors.neutral10} />
       <Animated.View
         style={[
           style.header,
@@ -65,7 +70,7 @@ const HomeScreen = () => {
           {opacity: opacity},
         ]}>
         <Header name={userRdx.user.name} />
-        <HorizontalList onPress={item => {}} />
+        {/* <HorizontalList onPress={item => {}} /> */}
       </Animated.View>
       <Animated.View style={{opacity: textOpacity}}>
         <Text variant="bodyLarge" style={style.hiddenText}>
@@ -73,6 +78,17 @@ const HomeScreen = () => {
         </Text>
       </Animated.View>
       <Animated.FlatList
+        keyExtractor={item => {
+          return item.number;
+        }}
+        // eslint-disable-next-line react/no-unstable-nested-components
+        ListEmptyComponent={() => {
+          return (
+            <View style={style.emptyList}>
+              <ActivityIndicator />
+            </View>
+          );
+        }}
         contentContainerStyle={{
           marginTop: HEADER_HEIGHT,
           backgroundColor: MD3Colors.neutral20,
@@ -111,6 +127,7 @@ const style = StyleSheet.create({
 
   verticalList: {
     flex: 1,
+    flexGrow: 1,
     borderRadius: 50,
   },
   hiddenText: {
@@ -120,5 +137,12 @@ const style = StyleSheet.create({
     fontSize: 23,
     padding: 12,
     fontWeight: 'bold',
+  },
+  emptyList: {
+    flex: 1,
+    flexGrow: 1,
+    height: 500,
+    justifyContent: 'center',
+    alignContent: 'center',
   },
 });

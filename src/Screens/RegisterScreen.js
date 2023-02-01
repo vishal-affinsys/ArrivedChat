@@ -64,10 +64,8 @@ const RegisterScreen = () => {
           } else {
             setLoading(true);
             setTimeout(async () => {
-              console.log('Completed');
               setLoading(false);
               setCompleted(true);
-              console.log({name: name, number: text});
               dispatch(setUser({name: name, number: text}));
               await storeData({
                 keystore: KEYS.adminUser,

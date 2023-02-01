@@ -19,7 +19,6 @@ export const storeData = async ({keystore, value}) => {
 export const getData = async ({keystore}) => {
   try {
     const jsonValue = await AsyncStorage.getItem(keystore);
-    console.log(typeof jsonValue, jsonValue);
     if (jsonValue !== null) {
       const data = JSON.parse(jsonValue);
       return data;

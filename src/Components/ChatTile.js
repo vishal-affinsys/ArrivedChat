@@ -4,7 +4,7 @@ import {MD3Colors, Avatar, Text, List} from 'react-native-paper';
 import {Pressable, StyleSheet} from 'react-native';
 
 const LeftElement = item => {
-  return <Avatar.Image source={{uri: item.imageUrl}} />;
+  return <Avatar.Image source={{uri: item.imageUrl}} size={45} />;
 };
 
 const RightElement = item => {
@@ -17,7 +17,7 @@ const ChatTile = React.memo(({item}) => {
     <Pressable
       rippleColor={MD3Colors.neutral50}
       onPress={() => {
-        navigate.navigate('chat');
+        navigate.navigate('chat', {item});
       }}>
       <List.Item
         style={style.chatItem}

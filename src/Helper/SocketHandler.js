@@ -7,6 +7,18 @@ const socket_url =
 
 const CHANNEL_NAME = 'cryto@0.0.1';
 
+export const createRoomId = ({source, target}) => {
+  if (source.includes('+91') && target.includes('+91')) {
+    return [source, target].sort().join('');
+  } else if (!source.includes('+91') && target.includes('+91')) {
+    return ['+91' + source, target].sort().join('');
+  } else if (source.includes('+91') && !target.includes('+91')) {
+    return [source, '+91' + target].sort().join('');
+  } else if (!source.includes('+91') && !target.includes('+91')) {
+    return ['+91' + source, '+91' + target].sort().join('');
+  }
+};
+
 class Socket {
   constructor(url = socket_url, key = encryption_key) {
     this.url = url === null ? socket_url : url;
@@ -36,14 +48,15 @@ class Socket {
       source: this.encryptMessage(source),
       target: this.encryptMessage(target),
     };
-    outLog.magenta(
-      'SOCKET EVENT: Message sent',
-      JSON.stringify(payload, null, 2),
-    );
+    // outLog.magenta(
+    //   'SOCKET EVENT: Message sent',
+    //   JSON.stringify(payload, null, 2),
+    // );
     this.connection.send(JSON.stringify(payload));
   }
-  addListener(setState) {
-    this.connection.onmessage = message => {
+
+  addListener(callback) {
+    this.connection.addEventListener('message', message => {
       if (message.data.includes('channel')) {
         const payload = JSON.parse(message.data);
         if (payload.channel !== undefined) {
@@ -52,15 +65,16 @@ class Socket {
             time: this.decryptMessage(payload.time),
             source: this.decryptMessage(payload.source),
             target: this.decryptMessage(payload.target),
+            isSentByMe: false,
           };
           outLog.magenta(
             'SOCKET EVENT: Message received',
             JSON.stringify(data, null, 2),
           );
-          setState(previous => [...previous, data]);
+          callback(data);
         }
       }
-    };
+    });
   }
   removeListener() {
     outLog.cyan('Connection closed');

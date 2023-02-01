@@ -1,32 +1,61 @@
-import React, {useContext} from 'react';
+import {skipToken} from '@reduxjs/toolkit/dist/query';
+import React from 'react';
 import {FlatList, StyleSheet, View} from 'react-native';
-import {Text, MD3Colors, TextInput} from 'react-native-paper';
-import {Context} from '../Store/Context/socketProvider';
+import {Text, MD3Colors, TextInput, Avatar} from 'react-native-paper';
+import {useSelector} from 'react-redux';
+import ChatBox from '../Components/ChatBox';
+import {createRoomId} from '../Helper/SocketHandler';
+import {
+  useGetMessagesQuery,
+  useSendMessagesQuery,
+} from '../Store/Reducers/MessageReducers';
 
-const ChatScreen = () => {
-  const [msg, setMsg] = React.useState('');
+const ChatScreen = ({route}) => {
+  // const [msg, setMsg] = React.useState('');
+  const user = route.params.item;
+  const UserRdx = useSelector(state => state.user);
+  // const roomId = [user.number, '+91' + UserRdx.user.number].sort().join('');
 
-  const message = useContext(Context);
+  const roomId = createRoomId({
+    target: user.number.split(' ').join(''),
+    source: UserRdx.user.number,
+  });
+  const inputRef = React.useRef();
+
+  const [myState, setState] = React.useState(skipToken); // initialize with skipToken to skip at first
+  // eslint-disable-next-line no-unused-vars
+  const result = useSendMessagesQuery(myState);
+
+  const receivedMsg = useGetMessagesQuery();
+  const sendingText = React.useRef('');
 
   return (
     <View style={style.body}>
+      <View style={style.header}>
+        <Avatar.Image source={{uri: user.imageUrl}} size={45} />
+        <Text style={style.headerText} variant="headlineSmall">
+          {user.name}
+        </Text>
+      </View>
+
       <FlatList
-        data={message.messages}
+        data={
+          receivedMsg.currentData === undefined
+            ? []
+            : receivedMsg.currentData[roomId]
+        }
         renderItem={({item}) => {
-          return (
-            <Text variant="bodyLarge" style={style.fontStyle}>
-              {JSON.stringify(item)}
-            </Text>
-          );
+          item.isSentByMe = item.source === UserRdx.user.number;
+          return <ChatBox message={item} />;
         }}
       />
       <TextInput
         multiline={true}
+        ref={inputRef}
         placeholder={'Message'}
         textColor={'white'}
         onChangeText={value => {
-          console.log(value);
-          setMsg(value);
+          sendingText.current = value;
         }}
         placeholderTextColor={'white'}
         right={
@@ -35,7 +64,17 @@ const ChatScreen = () => {
             size={25}
             iconColor={'white'}
             onPress={() => {
-              message.sendMessages(msg);
+              if (sendingText.current !== '') {
+                const data = {
+                  message: sendingText.current,
+                  source: UserRdx.user.number,
+                  target: user.number.split(' ').join(''),
+                  timestamp: new Date().toDateString(),
+                };
+                setState(data);
+              }
+              sendingText.current = '';
+              inputRef.current.clear();
             }}
           />
         }
@@ -59,5 +98,16 @@ const style = StyleSheet.create({
   textInput: {
     backgroundColor: MD3Colors.neutral30,
     color: 'white',
+  },
+  headerText: {
+    color: 'white',
+    marginLeft: 12,
+    fontWeight: 'bold',
+  },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    padding: 12,
+    backgroundColor: MD3Colors.neutral30,
   },
 });
