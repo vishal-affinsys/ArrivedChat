@@ -1,6 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
+import moment from 'moment';
 import React from 'react';
-import {View, StyleSheet, Dimensions} from 'react-native';
+import {View, StyleSheet, Dimensions, Image} from 'react-native';
 import {Avatar, MD3Colors, Text} from 'react-native-paper';
 import {friendsImage, userImage} from '../Models/User';
 
@@ -26,9 +27,32 @@ const ChatBox = ({message}) => {
             backgroundColor: message.isSentByMe
               ? 'rgba(120,120,255,0.3)'
               : MD3Colors.neutral60,
+            padding: message.image !== '' ? 0 : 12,
           },
         ]}>
-        <Text style={style.textStyle}>{message.message}</Text>
+        {message.image !== '' ? (
+          <View>
+            <Image
+              source={{uri: message.image}}
+              style={{
+                height: 300,
+                width: width / 1.5,
+                alignSelf: 'center',
+                borderRadius: 12,
+              }}
+            />
+            <Text style={{color: 'grey', padding: 4, fontSize: 10}}>
+              {moment(message.time).format('HH:mm a')}
+            </Text>
+          </View>
+        ) : (
+          <View>
+            <Text style={style.textStyle}>{message.message}</Text>
+            <Text style={{color: 'grey', padding: 4, fontSize: 10}}>
+              {moment(message.time).format('HH:mm a')}
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -44,9 +68,7 @@ const style = StyleSheet.create({
   },
   chatBox: {
     maxWidth: width * 0.7,
-    paddingVertical: 8,
     borderRadius: 12,
-    paddingHorizontal: 12,
   },
   textStyle: {
     fontFamily: 'NotoSerif-Regular',

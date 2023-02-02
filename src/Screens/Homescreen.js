@@ -58,6 +58,14 @@ const HomeScreen = () => {
       .catch(error => {
         console.error('Permission error: ', error);
       });
+    PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+      {
+        title: 'Media',
+        message: 'This app would like to view your media files.',
+        buttonPositive: 'Please accept bare mortal',
+      },
+    ).then(console.log);
   }, [dispatch]);
 
   return (
@@ -89,9 +97,11 @@ const HomeScreen = () => {
             </View>
           );
         }}
+        // eslint-disable-next-line react-native/no-inline-styles
         contentContainerStyle={{
           marginTop: HEADER_HEIGHT,
-          backgroundColor: MD3Colors.neutral20,
+          backgroundColor: MD3Colors.neutral10,
+          paddingTop: 12,
           paddingBottom: HEADER_HEIGHT,
         }}
         style={style.verticalList}
@@ -99,12 +109,11 @@ const HomeScreen = () => {
           [{nativeEvent: {contentOffset: {y: scrollY}}}],
           {useNativeDriver: true},
         )}
-        scrollEventThrottle={10}
-        onEndReachedThreshold={0.01}
+        scrollEventThrottle={1}
+        onEndReachedThreshold={0.2}
         onEndReached={() => dispatch(loadMore())}
         showsVerticalScrollIndicator={false}
         data={contact}
-        removeClippedSubviews={true}
         renderItem={({item}) => {
           return <ChatTile item={item} />;
         }}
@@ -127,7 +136,7 @@ const style = StyleSheet.create({
 
   verticalList: {
     flex: 1,
-    flexGrow: 1,
+    height: 550,
     borderRadius: 50,
   },
   hiddenText: {
@@ -140,8 +149,7 @@ const style = StyleSheet.create({
   },
   emptyList: {
     flex: 1,
-    flexGrow: 1,
-    height: 500,
+    height: 550,
     justifyContent: 'center',
     alignContent: 'center',
   },

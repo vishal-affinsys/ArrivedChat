@@ -19,6 +19,8 @@ export const createRoomId = ({source, target}) => {
   }
 };
 
+const BUFFER_SLICE = 20;
+
 class Socket {
   constructor(url = socket_url, key = encryption_key) {
     this.url = url === null ? socket_url : url;
@@ -40,14 +42,42 @@ class Socket {
   decryptMessage(value) {
     return decrypt(this.key, value);
   }
-  sendMessage({message, time, source, target}) {
+  sendMessage({message, time, source, target, isImage, image}) {
+    if (isImage) {
+      for (let i = 0; i < image.length; i = i + image.length / BUFFER_SLICE) {
+        this.sendPayload({
+          message,
+          time,
+          source,
+          target,
+          isImage,
+          image: image.slice(i, i + image.length / BUFFER_SLICE),
+        });
+      }
+      this.sendPayload({
+        message,
+        time,
+        source,
+        target,
+        isImage: false,
+        image: null,
+      });
+    } else {
+      this.sendPayload({message, time, source, target, isImage, image});
+    }
+  }
+
+  sendPayload({message, time, source, target, isImage, image}) {
     const payload = {
       channel: CHANNEL_NAME,
-      message: this.encryptMessage(message),
+      isImage: isImage,
+      image: image === undefined ? null : this.encryptMessage(image),
+      message: message === undefined ? null : this.encryptMessage(message),
       time: this.encryptMessage(time),
       source: this.encryptMessage(source),
       target: this.encryptMessage(target),
     };
+
     // outLog.magenta(
     //   'SOCKET EVENT: Message sent',
     //   JSON.stringify(payload, null, 2),
@@ -60,17 +90,20 @@ class Socket {
       if (message.data.includes('channel')) {
         const payload = JSON.parse(message.data);
         if (payload.channel !== undefined) {
+          // console.log(payload.isImage);
           const data = {
+            isImage: payload.isImage,
+            image: this.decryptMessage(payload.image),
             message: this.decryptMessage(payload.message),
             time: this.decryptMessage(payload.time),
             source: this.decryptMessage(payload.source),
             target: this.decryptMessage(payload.target),
             isSentByMe: false,
           };
-          outLog.magenta(
-            'SOCKET EVENT: Message received',
-            JSON.stringify(data, null, 2),
-          );
+          // outLog.magenta(
+          //   'SOCKET EVENT: Message received',
+          //   JSON.stringify(data, null, 2),
+          // );
           callback(data);
         }
       }

@@ -22,7 +22,7 @@ const ChatTile = React.memo(({item}) => {
       <List.Item
         style={style.chatItem}
         title={item.name}
-        description={item.lastMessage}
+        description={item.lastMessage === '' ? item.number : item.lastMessage}
         titleStyle={style.titleStyle}
         left={() => {
           return LeftElement(item);
@@ -39,6 +39,10 @@ const ChatTile = React.memo(({item}) => {
 const style = StyleSheet.create({
   chatItem: {
     padding: 12,
+    backgroundColor: 'rgba(25,25,25,1)',
+    marginBottom: 4,
+    marginHorizontal: 8,
+    borderRadius: 12,
   },
   titleStyle: {
     color: 'white',

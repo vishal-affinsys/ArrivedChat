@@ -32,6 +32,7 @@ const RegisterScreen = () => {
       <TextInput
         placeholder="Phone number"
         style={style.textInput}
+        keyboardType={'numeric'}
         maxLength={12}
         onChangeText={onChangeText}
         placeholderTextColor={'grey'}

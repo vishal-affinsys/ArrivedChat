@@ -7,9 +7,8 @@ import {searchContact, resetContact} from '../Store/Reducers/Contact';
 
 const width = Dimensions.get('window').width;
 
-const Header = ({name, setLazyContact}) => {
+const Header = ({name}) => {
   const dispatch = useDispatch();
-  const [isLoading, setIsLoading] = React.useState(false);
   return (
     <View style={style.container}>
       <View style={style.header}>
@@ -23,18 +22,12 @@ const Header = ({name, setLazyContact}) => {
         placeholder="Search your friends"
         elevation={12}
         searchAccessibilityLabel={'search your friends'}
-        loading={isLoading}
+        loading={false}
         placeholderTextColor={MD3Colors.neutral90}
         iconColor={'white'}
-        onEndEditing={event => {
-          const txt = event.nativeEvent.text;
-          dispatch(searchContact(txt));
-          setIsLoading(false);
-        }}
         onChangeText={txt => {
-          setIsLoading(true);
+          dispatch(searchContact(txt));
           if (txt === '') {
-            setIsLoading(false);
             dispatch(resetContact());
           }
         }}
