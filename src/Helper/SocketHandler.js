@@ -2,8 +2,10 @@ import {encrypt, decrypt} from 'react-native-simple-encryption';
 import {outLog} from './Logger';
 
 const encryption_key = 'VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaVVishal1703200';
-const socket_url =
-  'wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self';
+// const socket_url =
+//   'wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self';
+
+const socket_url = 'wss://echo.websocket.org/';
 
 const CHANNEL_NAME = 'cryto@0.0.1';
 
